@@ -1,0 +1,128 @@
+-- Challenge 1.0: We need to send out a promotional email to our existing customers!
+-- We need 1st and last names and email addresses
+select first_name,last_name,email from customer;
+
+--Challenge 1.2: We have a visitor from Australia who isn't familiar with MPAA movie ratings and we need to know the types of ratings we have in our database.  What ratings do we have availble?
+SELECT distinct(rating) from film;
+
+--Challenge 1.3: A customer forgot their wallet at our store, and we need to find their email to inform them.
+-- We need the email information for Nancy Thomas.
+select first_name, last_name, email from customer
+where first_name = 'Nancy'
+and last_name = 'Thomas';
+
+--Challenge 1.4: A cusotmer wants to know what the movie "Outlaw Hanky" is about.  
+--We need the description for the movie
+select title,description from film
+where title = 'Outlaw Hanky';
+
+--Challenge 1.5: A customer is late on their movie return, and we've mailed them a letter to their address at "259 Ipoh Drive".  We 
+--should call them and let them know.  We need the phone number for the customer at that address.
+select address, phone from address
+where address.address = '259 Ipoh Drive';
+
+--Challenge 1.6: We want to reward our first 10 paying customers
+--We need the top 10 customer ids who created a payment
+select distinct(customer_id),payment_date,amount from payment
+order by payment_date asc
+limit 10;
+
+--Challenge 1.7: A customer wants to quickly rent a video to watch over their short lunch break.
+--We need titles of the 5 shortest movies
+select title,length from film
+order by length asc
+limit 5;
+
+--Challenge 1.8: What options are there for movies 50 min or less
+select count(title) from film
+where length <= 50;
+
+--General Challenge 1.1
+--How many payment transactions were greater than $5.00?
+select count(amount) from payment
+where amount > 5.00;
+
+--General Challenge 1.2
+--How many actors have a first name that starts with the letter P?
+select count(*) from actor
+where first_name ilike 'P%';
+
+--General Challenge 1.3
+--how many unique districts are our customers from?
+select count(distinct(district)) from address;
+
+--General Challenge 1.4
+--Retrieve the list of names for those distinct districts from the previous question
+select district, count(distinct(district)) from address
+group by district;
+
+--General Challenge 1.5
+--How many films have a rating of R and a replacement cost between $5 and $15?
+select count(*) from film
+where rating = 'R'
+and replacement_cost between 5 and 15;
+
+--General Challenge 1.6
+--How many films have the word Truman somewhere in the title?
+select count(*) from film
+where title like '%Truman%';
+
+--Challenge 2.1
+--We have two staff members, with staff IDs 1 and 2.  We want to give a bonus to the staff member that handled the most payments, number of processed, not dollar amount.
+--We need to know how many payments did each staff member handle?  Who Gets the bonus?
+select staff_id, count(payment_id) as PaymentsProcessed from payment
+group by staff_id
+order by PaymentsProcessed desc;
+
+--Challenge 2.2
+--Corporate HQ is conducting a study on the relationship between replacement cost and a movie MPAA rating.  
+--We need the average replacement cost per MPAA rating
+select rating, round(avg(replacement_cost),2) as AverageRepCost from film
+group by rating
+order by AverageRepCost desc;
+
+--Challenge 2.3
+--We are running a promotion to reward our top 5 customers with coupons.  
+--We need the top 5 customer ids by total amount spent.
+select payment.customer_id, first_name, last_name, sum(amount) as TotalAmount from payment
+join customer on payment.customer_id = customer.customer_id
+group by payment.customer_id, first_name, last_name
+order by TotalAmount desc
+limit 5;
+
+--Challenge 2.4
+--We are launching a platinum service for customers with >=40 transaction payments
+--We need customer_ids that are eligible for platinum status
+select payment.customer_id as PlatinumCustomer, count(payment_id) as Payments, first_name,last_name,email from payment
+join customer on payment.customer_id = customer.customer_id
+group by payment.customer_id, first_name, last_name, email
+having count(payment_id) >= 40
+order by Payments desc;
+
+--Challenge 2.5
+--What are the customer ids of customers who have spent more than $100 in payment transactions with our staff_id #2?
+select customer_id, sum(amount) as TotalAmount from payment
+where staff_id = 2
+group by customer_id 
+having sum(amount) > 100
+order by TotalAmount desc;
+
+--Assessment Test 1
+--1. Return the customer IDs of customers who have spent at least $110 with staff member ID 2
+select customer_id, sum(amount) from payment
+where staff_id = 2
+group by customer_id
+having sum(amount) >= 110;
+
+--2. How many films begin with the letter J?
+select count(*) from film
+where title like 'J%';
+
+--3. What customer has the highest customer ID number whose name starts with an 'E' and has an address ID lower than 500?
+select first_name,last_name from customer
+where first_name like 'E%'
+and address_id < 500
+order by customer_id desc
+limit 1;
+
+
